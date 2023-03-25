@@ -8,35 +8,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recview: RecyclerView
     private lateinit var arrayNote :ArrayList<notemodel>
-    val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-    private val screenStartTime: Long = 0
+     private val screenStartTime: Long = 0
+    private var analytics: FirebaseAnalytics = Firebase.analytics
+    var db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_act)
-
-         FirebaseAnalytics.getInstance(this)
-            .setCurrentScreen(this, "Screen Name", "Screen Class Name")
-
-
-//         val startTime = System.currentTimeMillis()
-//        firebaseAnalytics.setCurrentScreen(this, "Screen Name", null);
-
-        val endTime = System.currentTimeMillis()
-
-        val screenTime = endTime - screenStartTime
-        val params = Bundle()
-        params.putLong("screen_Home", screenTime)
-        FirebaseAnalytics.getInstance(this).logEvent("screen_Home", params)
-        Log.w("Hanan", "$screenTime")
-
-
+        analytics = Firebase.analytics
         progressBar = findViewById(R.id.progressBar)
         recview = findViewById(R.id.recyclerView)
         recview.layoutManager = LinearLayoutManager(this)
@@ -44,17 +32,7 @@ class MainActivity : AppCompatActivity() {
         arrayNote = arrayListOf()
         progressBar.visibility = View.VISIBLE
 
-        var db = FirebaseFirestore.getInstance()
-//        val parentCollectionRef = db.collection("Notes")
-//        val newDocRef = parentCollectionRef.document()
-//        val subCollectionRef = newDocRef.collection("subCollection")
-//        val data = hashMapOf(
-//            "to do" to "study for quiz",
-//            "doing" to "do assigment",
-//            "done" to "print chapter"
-//        )
-//
-//        subCollectionRef.document("newDocId").set(data)
+        screenTrack("Main_Activity","MainActivity")
 
         db.collection("Notes").get().addOnSuccessListener {
             if (!it.isEmpty){
@@ -75,34 +53,47 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 Log.w("Hanan", "Error getting documents.", exception)
             }
-
-
-
     }
 
-//    override fun onStart() {
-//        super.onStart()
-//        analytics.setCurrentScreen(this, "Screen Name", null)
-//    }
-//
-//    // Track screen view duration when the activity stops
-//    override fun onStop() {
-//        super.onStop()
-//
-//        // Get the current screen name
-//        val currentScreen = analytics.setCurrentScreen(this,"home_act","home_act")
-//
-//        // Calculate the screen view duration
-//        val endTime = System.currentTimeMillis()
-//        val startTime = analytics.setSessionTimeoutDuration(Long.MIN_VALUE)
-//        val screenViewDuration = endT - startTime
-//
-//        // Log the screen view duration event with Firebase Analytics
-//        val params = Bundle().apply {
-//            putLong("screen_home", screenViewDuration)
-//        }
-//        analytics.logEvent("screen_home", params)
-//    }
+     // Track screen view duration when the activity stops
+     fun selectContent(contentId : String, contentName: String, contentType: String){
+         analytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT){
+             param(FirebaseAnalytics.Param.ITEM_ID, contentId);
+             param(FirebaseAnalytics.Param.ITEM_NAME, contentName);
+             param(FirebaseAnalytics.Param.CONTENT_TYPE, contentType);
+         }
+     }
+
+    fun screenTrack(screenClass: String, screenName:String){
+        analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW){
+            param(FirebaseAnalytics.Param.SCREEN_CLASS, screenClass);
+            param(FirebaseAnalytics.Param.SCREEN_NAME, screenName);
+        }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        val endTime = System.currentTimeMillis()
+
+        var screenTime = endTime - screenStartTime
+        screenTime =screenTime/1000
+        val params = Bundle()
+        params.putLong("screen_Home", screenTime)
+        FirebaseAnalytics.getInstance(this).logEvent("screen_Home", params)
+        Log.w("Hanan", "$screenTime")
+
+        val user = hashMapOf(
+            "name page" to "MainActivity",
+            "time" to screenTime
+        )
+
+        db.collection("screen_project")
+            .add(user).addOnSuccessListener { documentReference ->
+                Log.d("Hanan", "Document added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Hanan", "dont added", e)
+            }
+    }
 
 }
 

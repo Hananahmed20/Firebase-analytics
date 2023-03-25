@@ -1,4 +1,4 @@
 package com.example.firebasenotes
 
 
-data class notemodel (var image: String? ="" ,var titel :String?=" ")
+data class notemodel (var id :Int? =null ,var image: String? ="" ,var titel :String?=" ")

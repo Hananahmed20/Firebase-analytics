@@ -8,39 +8,48 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 
 class notes : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recview: RecyclerView
-    private lateinit var arrayNote: ArrayList<notemodel>
+    private lateinit var arrayNote: ArrayList<notedata>
     private val screenStartTime: Long = 0
+//    val id_note = notedata()
+    private lateinit var analytics: FirebaseAnalytics
+    var db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.notes)
+        analytics = Firebase.analytics
         progressBar = findViewById(R.id.progressBar)
         recview = findViewById(R.id.recyclerView)
         recview.layoutManager = LinearLayoutManager(this)
         recview.setHasFixedSize(true)
         arrayNote = arrayListOf()
         progressBar.visibility = View.VISIBLE
+        var intent_id = intent.getIntExtra("id", 0)
 
-        var db = FirebaseFirestore.getInstance()
+        screenTrack("Notes","notes")
 
-        db.collection("Notes").document("kTiYUa5eEXq0j9rP2b7b").collection("a").get()
-            .addOnSuccessListener {
+
+//        db.collection("Notes").document("kTiYUa5eEXq0j9rP2b7b").collection("a").get()
+           db.collection("Notes").get() .addOnSuccessListener {
                 if (!it.isEmpty) {
                     for (data in it.documents) {
-
-                        val note: notemodel? = data.toObject(notemodel::class.java)
+                        if (intent_id == data.getLong("id")?.toInt()) {
+                        val note: notedata? = data.toObject(notedata::class.java)
                         if (note != null) {
                             arrayNote.add(note)
                         }
-                    }
+                    }}
                     Log.w("Hanan", "No Error")
 
-                    recview.adapter = MyAdapter(this, arrayNote)
+                    recview.adapter = notesadapter(this ,arrayNote)
 
                 }
                 progressBar.visibility = View.GONE
@@ -51,20 +60,45 @@ class notes : AppCompatActivity() {
             }
 
 
+
+//        val intent = intent
+//        val txtt = intent.getStringExtra("titel")
+//        val doingg = intent.getStringExtra("doing")
+//        val donee = intent.getStringExtra("done")
+//        val numberdescc = intent.getStringExtra("numberdesc")
+    }
+    fun screenTrack(screenClass: String, screenName:String){
+        analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW){
+            param(FirebaseAnalytics.Param.SCREEN_CLASS, screenClass);
+            param(FirebaseAnalytics.Param.SCREEN_NAME, screenName);
+        }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
         val endTime = System.currentTimeMillis()
 
-        val screenTime = endTime - screenStartTime
+        var screenTime = endTime - screenStartTime
+        screenTime =screenTime/1000
         val params = Bundle()
         params.putLong("screen_notes", screenTime)
-        FirebaseAnalytics.getInstance(this).logEvent("screen_desc", params)
+        FirebaseAnalytics.getInstance(this).logEvent("screen_notes", params)
         Log.w("Hanan", "$screenTime")
-        val intent = intent
-        val txtt = intent.getStringExtra("titel")
-        val doingg = intent.getStringExtra("doing")
-        val donee = intent.getStringExtra("done")
-        val numberdescc = intent.getStringExtra("numberdesc")
+
+        val user = hashMapOf(
+            "name page" to "notes",
+            "time" to screenTime
+        )
+
+        db.collection("screen_project")
+            .add(user).addOnSuccessListener { documentReference ->
+                Log.d("Hanan", "Document added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Hanan", "dont added", e)
+            }
     }
 }
+
 //        db.collection("Notes").document("a").collection("c1")
 //            .addSnapshotListener { snaphot, exception ->
 //                    if (exception != null) {

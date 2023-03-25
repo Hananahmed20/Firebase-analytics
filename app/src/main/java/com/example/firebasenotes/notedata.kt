@@ -1,4 +1,7 @@
 package com.example.firebasenotes
 
-data class notedata (var image: String? ="" ,var titel :String?=" "
-                     ,var doing :String?="",var done:String?="",var numberdesc:String?="")
+data class notedata (var id :Int? = null,
+                     var image: String?= null ,
+                     var titel :String?= null,
+                     var decc : String? = null,
+                     var numberdesc:String?= null )
