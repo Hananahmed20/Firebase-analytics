@@ -59,8 +59,8 @@ class MyAdapter(var activity: Activity, private val NoteList: ArrayList<notemode
 
     fun user_event(){
         analytics.logEvent("image") {
-            param("name_image","b1.png")
-            param("select1","selected")
+            param("name_image","contentmangment.png")
+            param("select","selected")
         }
     }
 }

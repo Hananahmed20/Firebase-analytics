@@ -20,10 +20,10 @@ class MainActivity : AppCompatActivity() {
      private val screenStartTime: Long = 0
     private var analytics: FirebaseAnalytics = Firebase.analytics
     var db = FirebaseFirestore.getInstance()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_act)
+
         analytics = Firebase.analytics
         progressBar = findViewById(R.id.progressBar)
         recview = findViewById(R.id.recyclerView)
@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         val endTime = System.currentTimeMillis()
-
         var screenTime = endTime - screenStartTime
         screenTime =screenTime/1000
         val params = Bundle()

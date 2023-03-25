@@ -53,8 +53,8 @@ import com.squareup.picasso.Picasso
     }
          fun user_event(){
              analytics.logEvent("image") {
-                 param("name_image","b1.png")
-                 param("select1","selected")
+                 param("name_image","contentmangment.png")
+                 param("select","selected")
              }
          }
 }
