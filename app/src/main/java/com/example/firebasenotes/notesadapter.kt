@@ -22,10 +22,7 @@ import com.squareup.picasso.Picasso
         var txttitel: TextView = itemView.findViewById(R.id.txttitel)
 
         val imagev: ImageView = itemView.findViewById(R.id.imageView)
-
-
     }
-
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val ItemsViewModel = NoteList[position]
@@ -43,8 +40,6 @@ import com.squareup.picasso.Picasso
              intent.putExtra("titel_note", holder.txttitel.text)
              context.startActivity(intent)
         }
-
-
 
     }
 

@@ -18,8 +18,7 @@ class notes : AppCompatActivity() {
     private lateinit var recview: RecyclerView
     private lateinit var arrayNote: ArrayList<notedata>
     private val screenStartTime: Long = 0
-//    val id_note = notedata()
-    private lateinit var analytics: FirebaseAnalytics
+     private lateinit var analytics: FirebaseAnalytics
     var db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
